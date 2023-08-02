@@ -1,0 +1,1 @@
+the snake and food is not showing up and it dodirectly an Game Over! Your score was 0

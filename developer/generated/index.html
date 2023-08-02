@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #gameArea {
+            position: relative;
+            height: 300px;
+            width: 300px;
+            border: 1px solid black;
+        }
+        .snake {
+            background-color: green;
+            position: absolute;
+            height: 10px;
+            width: 10px;
+        }
+        .food {
+            background-color: red;
+            position: absolute;
+            height: 10px;
+            width: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea"></div>
+    <div id="scoreDisplay"></div>
+    <button onclick="startGame()">Start Game</button>
+
+    <script>
+        var gameArea = document.getElementById('gameArea');
+        var scoreDisplay = document.getElementById('scoreDisplay');
+        var snake = [{ top: 0, left: 0 }];
+        var direction = 'right';
+        var score = 0;
+        var food = null;
+
+        function startGame() {
+            // Reset the game state
+            snake = [{ top: 0, left: 0 }];
+            direction = 'right';
+            score = 0;
+            if (food) food.parentElement.removeChild(food);
+            food = null;
+            // Start the game loop
+            setInterval(gameLoop, 200);
+        }
+
+        function gameLoop() {
+            var snakeHead = Object.assign({}, snake[0]); // copy head
+            switch (direction) {
+                case 'left':
+                    snakeHead.left -= 10;
+                    break;
+                case 'up':
+                    snakeHead.top -= 10;
+                    break;
+                case 'right':
+                    snakeHead.left += 10;
+                    break;
+                case 'down':
+                    snakeHead.top += 10;
+                    break;
+            }
+            snake.unshift(snakeHead); // add new head to snake
+
+            // Game over conditions
+            if (snakeHead.left < 0 || snakeHead.top < 0 || snakeHead.left > 290 || snakeHead.top > 290) {
+                return gameOver();
+            }
+            for (var i = 1; i < snake.length; i++) {
+                if (snake[i].top === snakeHead.top && snake[i].left === snakeHead.left) {
+                    return gameOver();
+                }
+            }
+
+            // Food collision
+            if (food && food.style.top === snakeHead.top + 'px' && food.style.left === snakeHead.left + 'px') {
+                score++;
+                food.parentElement.removeChild(food);
+                food = null;
+            } else {
+                var removedTail = snake.pop();
+                var removedTailEl = document.getElementById('snake' + removedTail.top + '-' + removedTail.left);
+                if (removedTailEl) {
+                    removedTailEl.parentElement.removeChild(removedTailEl);
+                }
+            }
+
+            // Add the new head of the snake
+            var el = document.createElement('div');
+            el.id = 'snake' + snakeHead.top + '-' + snakeHead.left;
+            el.className = 'snake';
+            el.style.top = snakeHead.top + 'px';
+            el.style.left = snakeHead.left + 'px';
+            gameArea.appendChild(el);
+
+            // Add food if there is none
+            if (!food) {
+                var foodEl = document.createElement('div');
+                foodEl.className = 'food';
+                foodEl.style.top = Math.floor(Math.random() * 30) * 10 + 'px';
+                foodEl.style.left = Math.floor(Math.random() * 30) * 10 + 'px';
+                gameArea.appendChild(foodEl);
+                food = foodEl;
+            }
+
+            // Update the score
+            scoreDisplay.textContent = 'Score: ' + score;
+        }
+
+        function gameOver() {
+            alert('Game Over! Your score was ' + score);
+        }
+
+        window.addEventListener('keydown', function(e) {
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (direction !== 'down') direction = 'up';
+                    break;
+                case 'ArrowDown':
+                    if (direction !== 'up') direction = 'down';
+                    break;
+                case 'ArrowRight':
+                    if (direction !== 'left') direction = 'right';
+                    break;
+                case 'ArrowLeft':
+                    if (direction !== 'right') direction = 'left';
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
